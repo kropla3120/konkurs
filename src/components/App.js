@@ -13,7 +13,7 @@ import "../styles/App.scss";
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDpMAnd5dj83ySFO8KgTTU43GVvBE9SzOc",
-  authDomain: "wmguessr.firebaseapp.com",
+  authDomain: "wmguessr.web.app",
   projectId: "wmguessr",
   storageBucket: "wmguessr.appspot.com",
   messagingSenderId: "222770451102",

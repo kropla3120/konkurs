@@ -5,6 +5,7 @@ import "../styles/Game.scss";
 
 export default function Game({ game, setGame, db }) {
   const [roundSummary, setRoundSummary] = useState(null);
+  const [gameSummary, setGameSummary] = useState({ rounds: [], summaryScreen: false });
 
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
@@ -118,48 +119,81 @@ export default function Game({ game, setGame, db }) {
       }
 
       // console.log(getZoom(guess.lat, guess.lng, locationGeo.lat, locationGeo.lng));
-      if (game.currentLocation < 4) {
-        setRoundSummary({
-          distance: distanceKm > 1 ? distanceKm.toFixed(2) + " km" : distanceM.toFixed(2) + " m",
-          points: points,
-          center: getCenter(game.guess, locationGeo),
-          guess: game.guess,
-          location: locationGeo,
-          bounds: bounds,
-          zoom: getZoom(game.guess.lat, game.guess.lng, locationGeo.lat, locationGeo.lng) + 1,
-        });
-        setGame({ ...game, totalScore: game.totalScore + points });
-      } else {
-        console.log("abc");
-      }
+
+      setRoundSummary({
+        distance: distanceKm > 1 ? distanceKm.toFixed(2) + " km" : distanceM.toFixed(2) + " m",
+        points: points,
+        center: getCenter(game.guess, locationGeo),
+        guess: game.guess,
+        location: locationGeo,
+        bounds: bounds,
+        zoom: getZoom(game.guess.lat, game.guess.lng, locationGeo.lat, locationGeo.lng) + 1,
+        final: game.currentLocation === 4 ? true : false,
+      });
+      setGame({ ...game, totalScore: game.totalScore + points });
+      setGameSummary({ ...gameSummary, rounds: gameSummary.rounds.concat({ guess: game.guess, location: locationGeo }) });
     }
   };
   if (isLoaded && game.locations?.length > 0) {
     if (roundSummary) {
-      return (
-        <GoogleMap mapContainerStyle={containerStyle} center={roundSummary.center} zoom={roundSummary.zoom} options={{ disableDefaultUI: true }} onUnmount={onUnmount}>
-          <Marker position={roundSummary.guess} />
-          <Marker position={roundSummary.location} />
-          <Polyline path={[roundSummary.guess, roundSummary.location]} />
-          <div className="game_roundSummary">
-            <div>
-              <h1 className="game_roundSummary_distance">Odległość: {roundSummary.distance}</h1>
-              <h1 className="game_roundSummary_points">Punkty: {roundSummary.points}</h1>
+      if (gameSummary.summaryScreen) {
+        return (
+          <GoogleMap mapContainerStyle={containerStyle} center={{ lat: 53.8632402, lng: 20.3740641 }} zoom={8} options={{ disableDefaultUI: true }} onUnmount={onUnmount}>
+            {gameSummary.rounds.map((round, index) => {
+              return (
+                <>
+                  <Marker position={round.guess} />
+                  <Marker position={round.location} />
+                  <Polyline path={[round.guess, round.location]} />
+                </>
+              );
+            })}
+            <div className="game_roundSummary">
+              <div>
+                <h1 className="game_roundSummary_points">Wszystkie punkty: {game.totalScore}</h1>
+              </div>
             </div>
-            <button
-              onClick={() => {
-                if (game.currentLocation < 5) {
-                  setGame({ ...game, currentLocation: game.currentLocation + 1, guess: null });
-                  setRoundSummary(null);
-                }
-              }}
-              style={{ padding: "1rem" }}
-            >
-              Następna lokalizacja!
-            </button>
-          </div>
-        </GoogleMap>
-      );
+          </GoogleMap>
+        );
+      } else {
+        return (
+          <GoogleMap mapContainerStyle={containerStyle} center={roundSummary.center} zoom={roundSummary.zoom} options={{ disableDefaultUI: true }} onUnmount={onUnmount}>
+            <>
+              <Marker position={roundSummary.guess} />
+              <Marker position={roundSummary.location} />
+              <Polyline path={[roundSummary.guess, roundSummary.location]} />
+            </>
+            <div className="game_roundSummary">
+              <div>
+                <h1 className="game_roundSummary_distance">Odległość: {roundSummary.distance}</h1>
+                <h1 className="game_roundSummary_points">Punkty: {roundSummary.points}</h1>
+              </div>
+              {roundSummary.final ? (
+                <button
+                  onClick={() => {
+                    setGameSummary({ ...gameSummary, summaryScreen: true });
+                  }}
+                  style={{ padding: "1rem" }}
+                >
+                  Podsumowanie
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    if (game.currentLocation < 5) {
+                      setGame({ ...game, currentLocation: game.currentLocation + 1, guess: null });
+                      setRoundSummary(null);
+                    }
+                  }}
+                  style={{ padding: "1rem" }}
+                >
+                  Następna lokalizacja!
+                </button>
+              )}
+            </div>
+          </GoogleMap>
+        );
+      }
     } else {
       return (
         <GoogleMap mapContainerStyle={containerStyle} onLoad={onLoad}>
