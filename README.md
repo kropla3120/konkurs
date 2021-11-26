@@ -7,7 +7,6 @@ Gra jest zahostowana pod adresem
 ### `https://wmguessr.web.app`
 
 Aby włączyć grę w trybie dewloperskim wymagana jest instalacja NodeJS 1.16^ na komputerze.
-
 Po pobraniu repo należy wykonać komendę w cmd aby pobrać wymagane biblioteki:
 
 ### `npm install`

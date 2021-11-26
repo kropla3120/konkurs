@@ -1,12 +1,13 @@
 {
   "name": "wmguessr",
-  "version": "0.1.0",
+  "version": "0.9.0",
+  "author": {
+    "name": "Mateusz Kroplewski",
+    "email": "averek3120@gmail.com"
+  },
   "private": true,
   "dependencies": {
     "@react-google-maps/api": "^2.7.0",
-    "@testing-library/jest-dom": "^5.11.4",
-    "@testing-library/react": "^11.1.0",
-    "@testing-library/user-event": "^12.1.10",
     "firebase": "^9.4.1",
     "node-sass": "^6.0.1",
     "normalize.css": "^8.0.1",
