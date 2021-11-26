@@ -10,6 +10,7 @@ export default function SplashScreen({ setGame }) {
           <figure className="splash_figure">
             <img src="/images/splash_miasta.jpg" alt="mode_miasta" />
             <button
+              className="btn"
               onClick={(e) => {
                 setGame({ mode: "cities" });
               }}
@@ -22,6 +23,7 @@ export default function SplashScreen({ setGame }) {
           <figure className="splash_figure">
             <img src="/images/splash_krajobrazy.jpg" alt="mode_krajobrazy" />
             <button
+              className="btn"
               onClick={(e) => {
                 setGame({ mode: "sights" });
               }}
@@ -34,6 +36,7 @@ export default function SplashScreen({ setGame }) {
           <figure className="splash_figure">
             <img src="/images/splash_zabytki.jpg" alt="mode_zabytki" />
             <button
+              className="btn"
               onClick={(e) => {
                 setGame({ mode: "monuments" });
               }}

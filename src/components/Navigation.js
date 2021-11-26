@@ -10,17 +10,17 @@ function Navigation({ game, setGame }) {
         </a>
       </div>
       {game && (
-        <>
+        <div className="nav_gameDiv">
           <h1>Punkty: {game.totalScore}</h1>
           <button
-            className="nav_leaveGame"
+            className="nav_leaveGame btn"
             onClick={(e) => {
               setGame(null);
             }}
           >
             Wyjdź z gry
           </button>
-        </>
+        </div>
       )}
     </div>
   );

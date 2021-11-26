@@ -1,10 +1,14 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { collection, getDocs, doc } from "firebase/firestore/lite";
 import { GoogleMap, useJsApiLoader, StreetViewPanorama, Marker, Polyline } from "@react-google-maps/api";
+import tippy from "tippy.js";
+
+import "tippy.js/dist/tippy.css";
 import "../styles/Game.scss";
 
 export default function Game({ game, setGame, db }) {
   const [roundSummary, setRoundSummary] = useState(null);
+  const [streetView, setStreetView] = useState(null);
   const [gameSummary, setGameSummary] = useState({ rounds: [], summaryScreen: false });
 
   const { isLoaded } = useJsApiLoader({
@@ -195,6 +199,10 @@ export default function Game({ game, setGame, db }) {
         );
       }
     } else {
+      tippy("#return", {
+        content: "Wróć do pierwotnej lokalizacji",
+        placement: "right",
+      });
       return (
         <GoogleMap mapContainerStyle={containerStyle} onLoad={onLoad}>
           <StreetViewPanorama
@@ -202,10 +210,28 @@ export default function Game({ game, setGame, db }) {
             visible={true}
             options={{
               disableDefaultUI: true,
+              panControl: true,
+              panControlOptions: {
+                position: window.google.maps.ControlPosition.TOP_LEFT,
+              },
               enableCloseButton: false,
               position: game.locations[game.currentLocation].geo,
             }}
+            onLoad={(sv) => {
+              setStreetView(sv);
+            }}
           />
+          <div className="game_controls">
+            <button
+              className="btn"
+              id="return"
+              onClick={() => {
+                streetView.setPosition(game.locations[game.currentLocation].geo);
+              }}
+            >
+              <ion-icon name="flag"></ion-icon>
+            </button>
+          </div>
           <div className="game_guessDiv">
             <GoogleMap
               onClick={(e) => {
@@ -223,7 +249,7 @@ export default function Game({ game, setGame, db }) {
               {game.guess && <Marker position={game.guess} />}
             </GoogleMap>
             <button
-              className={game.guess ? "game_guessBtn" : "game_guessBtn_disabled"} //jesli nie wybrano punktu to przycisk jest nieaktywny
+              className={game.guess ? "game_guessBtn btn" : "game_guessBtn_disabled btn"} //jesli nie wybrano punktu to przycisk jest nieaktywny
               onClick={() => {
                 guessHandle();
               }}

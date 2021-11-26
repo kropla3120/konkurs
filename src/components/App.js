@@ -1,16 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Navigation from "./Navigation";
 import SplashScreen from "./SplashScreen";
 import Game from "./Game";
+import { isMobile } from "react-device-detect";
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, getDocs } from "firebase/firestore/lite";
+import { getFirestore } from "firebase/firestore/lite";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
 
 import "normalize.css";
 import "../styles/App.scss";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
+// Konfiguracja Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyDpMAnd5dj83ySFO8KgTTU43GVvBE9SzOc",
   authDomain: "wmguessr.web.app",
@@ -20,16 +20,36 @@ const firebaseConfig = {
   appId: "1:222770451102:web:dc0abc1c0ef6f41d76218f",
 };
 
-// Initialize Firebase
+// Inicjalizacja Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth();
 
 function App() {
-  let [game, setGame] = useState(false);
+  const [game, setGame] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  useEffect(() => {
+    signInAnonymously(auth).catch((error) => {
+      console.error(error.message);
+    });
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsAuthenticated(user.uid);
+      } else {
+        setIsAuthenticated(false);
+      }
+    });
+  });
   return (
     <>
       <Navigation game={game} setGame={setGame} />
-      <div style={{ transform: "translateY(6rem)", height: "90vh" }}>{game ? <Game game={game} setGame={setGame} db={db} /> : <SplashScreen setGame={setGame} />}</div>
+      {isMobile ? (
+        <div className="mobile-guard">
+          <h1>Gra obsługiwana jest tylko na komputerach PC.</h1>
+        </div>
+      ) : (
+        <div style={{ transform: "translateY(6rem)", height: "90vh" }}>{game && isAuthenticated ? <Game game={game} setGame={setGame} db={db} /> : <SplashScreen setGame={setGame} />}</div>
+      )}
     </>
   );
 }
