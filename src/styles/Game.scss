@@ -1,22 +1,24 @@
 .game_guessDiv {
-  width: 500px;
-  height: 400px;
+  width: 20%;
+  height: 35%;
   z-index: 2;
   position: absolute;
   bottom: 0;
   right: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-evenly;
   margin: 1rem;
+  transition: 0.5s;
+}
+.game_guessDiv:hover {
+  width: 30%;
+  height: 55%;
 }
 .game_guessBtn {
   width: 100%;
-  height: 10%;
+  height: 3rem;
+  position: absolute;
+  bottom: 0;
 }
 .game_guessBtn_disabled {
-  width: 100%;
-  height: 10%;
   cursor: not-allowed;
   background: rgb(217, 217, 217);
   background: linear-gradient(90deg, rgba(217, 217, 217, 1) 0%, rgba(163, 163, 163, 1) 100%) !important;
@@ -25,14 +27,33 @@
   position: absolute;
   display: flex;
   flex-direction: column;
-  flex-wrap: wrap;
-  width: 80%;
-  margin: 2rem 10%;
-  background-color: #17171c;
-  height: 15vh;
+  justify-content: space-between;
+  width: 25rem;
+  margin: 1rem 1rem;
+  backdrop-filter: blur(8px) brightness(0.4);
+  height: calc(70%);
   z-index: 3;
   bottom: 0;
+  left: 0;
   border-radius: 0.5rem;
+  box-sizing: border-box;
+  padding: 1rem;
+}
+.game_roundSummary h1 {
+  font-weight: 400;
+  font-size: 30px;
+}
+.game_roundSummary h1 b {
+  font-size: 40px;
+  font-stretch: 10%;
+  font-weight: 800;
+  letter-spacing: -2px;
+  background: linear-gradient(90deg, rgba(255, 240, 0, 1) 0%, rgba(27, 248, 79, 1) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.game_roundSummary p {
+  font-size: 20px;
 }
 .game_controls {
   z-index: 2;

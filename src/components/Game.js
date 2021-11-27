@@ -129,7 +129,7 @@ export default function Game({ game, setGame, db }) {
         points: points,
         center: getCenter(game.guess, locationGeo),
         guess: game.guess,
-        location: locationGeo,
+        location: game.locations[game.currentLocation],
         bounds: bounds,
         zoom: getZoom(game.guess.lat, game.guess.lng, locationGeo.lat, locationGeo.lng) + 1,
         final: game.currentLocation === 4 ? true : false,
@@ -146,16 +146,31 @@ export default function Game({ game, setGame, db }) {
             {gameSummary.rounds.map((round, index) => {
               return (
                 <>
-                  <Marker position={round.guess} />
-                  <Marker position={round.location} />
-                  <Polyline path={[round.guess, round.location]} />
+                  <Marker key={index} position={round.guess} />
+                  <Marker key={index} position={round.location} />
+                  <Polyline key={index} path={[round.guess, round.location]} />
                 </>
               );
             })}
-            <div className="game_roundSummary">
+            <div className="game_roundSummary" style={{ height: "auto" }}>
               <div>
-                <h1 className="game_roundSummary_points">Wszystkie punkty: {game.totalScore}</h1>
+                <h1 className="game_roundSummary_points">
+                  Gratulacje!
+                  <br /> Zdobyłeś <b>{game.totalScore}</b> punktów!
+                </h1>
               </div>
+              <button
+                className="btn"
+                style={{ padding: "1rem" }}
+                onClick={() => {
+                  setGame(null);
+                  setGame({ mode: "cities" });
+                  setGameSummary({ rounds: [], summaryScreen: false });
+                  setRoundSummary(null);
+                }}
+              >
+                Następna gra ?
+              </button>
             </div>
           </GoogleMap>
         );
@@ -163,17 +178,24 @@ export default function Game({ game, setGame, db }) {
         return (
           <GoogleMap mapContainerStyle={containerStyle} center={roundSummary.center} zoom={roundSummary.zoom} options={{ disableDefaultUI: true }} onUnmount={onUnmount}>
             <>
-              <Marker position={roundSummary.guess} />
-              <Marker position={roundSummary.location} />
-              <Polyline path={[roundSummary.guess, roundSummary.location]} />
+              <Marker position={roundSummary.guess} id="guessMarker" />
+              <Marker position={roundSummary.location.geo} title="Lokalizacja" id="locationMarker" />
+              <Polyline path={[roundSummary.guess, roundSummary.location.geo]} options={{ strokeColor: "#17171c", strokeOpacity: "0.8", strokeWeight: "2" }} />
             </>
             <div className="game_roundSummary">
               <div>
-                <h1 className="game_roundSummary_distance">Odległość: {roundSummary.distance}</h1>
-                <h1 className="game_roundSummary_points">Punkty: {roundSummary.points}</h1>
+                <h1 className="game_roundSummary_distance">
+                  Odległość: <b>{roundSummary.distance} </b>
+                </h1>
+                <h1 className="game_roundSummary_points">
+                  Punkty: <b>{roundSummary.points}</b>
+                </h1>
+                <h1>Fakty:</h1>
+                <p>{roundSummary.location.desc}</p>
               </div>
               {roundSummary.final ? (
                 <button
+                  className="btn"
                   onClick={() => {
                     setGameSummary({ ...gameSummary, summaryScreen: true });
                   }}
@@ -183,6 +205,7 @@ export default function Game({ game, setGame, db }) {
                 </button>
               ) : (
                 <button
+                  className="btn"
                   onClick={() => {
                     if (game.currentLocation < 5) {
                       setGame({ ...game, currentLocation: game.currentLocation + 1, guess: null });
@@ -241,7 +264,7 @@ export default function Game({ game, setGame, db }) {
               options={{
                 disableDefaultUI: true,
               }}
-              mapContainerStyle={{ width: "100%", height: "80%", borderRadius: "0.5rem" }}
+              mapContainerStyle={{ width: "100%", height: "calc(100% - 4rem)", borderRadius: "0.5rem" }}
               zoom={7.1}
               onLoad={onLoadGuess}
               // onUnmount={onUnmount}
@@ -249,7 +272,7 @@ export default function Game({ game, setGame, db }) {
               {game.guess && <Marker position={game.guess} />}
             </GoogleMap>
             <button
-              className={game.guess ? "game_guessBtn btn" : "game_guessBtn_disabled btn"} //jesli nie wybrano punktu to przycisk jest nieaktywny
+              className={game.guess ? "game_guessBtn btn" : "game_guessBtn game_guessBtn_disabled btn"} //jesli nie wybrano punktu to przycisk jest nieaktywny
               onClick={() => {
                 guessHandle();
               }}
