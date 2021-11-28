@@ -4,7 +4,7 @@ Gracz po wejściu do gry dostaje widok StreetView 5 losowych lokalizacji znajduj
 
 Gra jest zahostowana pod adresem
 
-### `https://wmguessr.web.app`
+# [https://wmguessr.web.app](https://wmguessr.web.app)
 
 Aby włączyć grę w trybie dewloperskim wymagana jest instalacja NodeJS 1.16^ na komputerze.
 Po pobraniu repo należy wykonać komendę w cmd aby pobrać wymagane biblioteki:
