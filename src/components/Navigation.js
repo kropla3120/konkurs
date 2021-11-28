@@ -11,7 +11,9 @@ function Navigation({ game, setGame }) {
       </div>
       {game && (
         <div className="nav_gameDiv">
-          <h1>Punkty: {game.totalScore}</h1>
+          <h1>
+            Punkty: <b>{game.totalScore}</b>
+          </h1>
           <button
             className="nav_leaveGame btn"
             onClick={(e) => {

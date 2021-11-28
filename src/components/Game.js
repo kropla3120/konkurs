@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { collection, getDocs, doc } from "firebase/firestore/lite";
+import { collection, getDocs } from "firebase/firestore/lite";
 import { GoogleMap, useJsApiLoader, StreetViewPanorama, Marker, Polyline } from "@react-google-maps/api";
 import tippy from "tippy.js";
 
@@ -10,7 +10,7 @@ export default function Game({ game, setGame, db }) {
   const [roundSummary, setRoundSummary] = useState(null);
   const [streetView, setStreetView] = useState(null);
   const [gameSummary, setGameSummary] = useState({ rounds: [], summaryScreen: false });
-
+  const [gameReload, setGameReload] = useState(null);
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: "AIzaSyCJKJsgS2XTO9MX7uhSvthiuxe3fYJrRf8",
@@ -41,28 +41,33 @@ export default function Game({ game, setGame, db }) {
     [setGame, game]
   );
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const data = await getDocs(collection(db, "maps", game.mode, "locations")); //pobieranie wszystkich lokaliazcji z bazy danych dla danego trybu gry
-      return data._docs.map((location) => {
-        return location.data();
-      });
-    };
-    fetchData().then((locationsArr) => {
-      let randomLocations = [];
-      for (let i = 0; i < 5; i++) {
-        //losowanie 5 lokalizacji
-        let randomLocation = Math.floor(Math.random() * locationsArr.length);
-        if (randomLocations.includes(locationsArr[randomLocation])) {
-          i--; //jesli juz wylosowalismy taka sama lokalizacje to losujemy jeszcze raz
-        } else {
-          randomLocations.push(locationsArr[randomLocation]);
+  useEffect(
+    () => {
+      const fetchData = async () => {
+        const data = await getDocs(collection(db, "maps", game.mode, "locations")); //pobieranie wszystkich lokaliazcji z bazy danych dla danego trybu gry
+        return data._docs.map((location) => {
+          return location.data();
+        });
+      };
+      fetchData().then((locationsArr) => {
+        let randomLocations = [];
+        for (let i = 0; i < 5; i++) {
+          //losowanie 5 lokalizacji
+          let randomLocation = Math.floor(Math.random() * locationsArr.length);
+          if (randomLocations.includes(locationsArr[randomLocation])) {
+            i--; //jesli juz wylosowalismy taka sama lokalizacje to losujemy jeszcze raz
+          } else {
+            randomLocations.push(locationsArr[randomLocation]);
+          }
         }
-      }
-      console.log(randomLocations);
-      setGame({ ...game, totalScore: 0, locations: randomLocations, currentLocation: 0 });
-    });
-  }, []);
+        console.log(randomLocations);
+        setGame({ ...game, totalScore: 0, locations: randomLocations, currentLocation: 0 });
+        setGameReload(false);
+      });
+    },
+    // eslint-disable-next-line
+    [gameReload]
+  );
 
   const calculateDistance = (coords1, coords2) => {
     function toRad(x) {
@@ -70,11 +75,9 @@ export default function Game({ game, setGame, db }) {
       return (x * Math.PI) / 180;
     }
     var R = 6371; // promień ziemi w km
-    var x1 = coords2.lat - coords1.lat; //delta lat
-    var dLat = toRad(x1); //delta lat w radianach
-    var x2 = coords2.lng - coords1.lng; //delta lng
-    var dLon = toRad(x2); // delta lon w radianach
-    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(toRad(coords1.lat)) * Math.cos(toRad(coords2.lat)) * Math.sin(dLon / 2) * Math.sin(dLon / 2); //obliczanie odleglosci
+    var dLatRad = toRad(coords2.lat - coords1.lat); //delta dlugosci geograficznej w radianach
+    var dLonRad = toRad(coords2.lng - coords1.lng); //delta szerokosci geografiicznej w radianach
+    var a = Math.sin(dLatRad / 2) * Math.sin(dLatRad / 2) + Math.cos(toRad(coords1.lat)) * Math.cos(toRad(coords2.lat)) * Math.sin(dLonRad / 2) * Math.sin(dLonRad / 2); //formula haversine
     var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     var d = R * c; //obliczanie odleglosci w km
     return d;
@@ -104,6 +107,7 @@ export default function Game({ game, setGame, db }) {
       }
 
       function getZoom(lat_a, lng_a, lat_b, lng_b) {
+        //funkcja obliczająca jak bardzo ma byc przyblizona mapa tak aby zmiescily sie na ekranie dwa punkty
         let latDif = Math.abs(latRad(lat_a) - latRad(lat_b));
         let lngDif = Math.abs(lng_a - lng_b);
 
@@ -116,15 +120,14 @@ export default function Game({ game, setGame, db }) {
         return Math.round(Math.min(lngZoom, latZoom));
       }
       function getCenter(point1, point2) {
-        let lat = (point1.lat + point2.lat) / 2;
+        let lat = (point1.lat + point2.lat) / 2; //obliczanie srodka miedzy dwoma punktami
         let lng = (point1.lng + point2.lng) / 2;
 
         return { lat: lat, lng: lng };
       }
 
-      // console.log(getZoom(guess.lat, guess.lng, locationGeo.lat, locationGeo.lng));
-
       setRoundSummary({
+        //obiekt zawierajacy informacje o wyniku rundy
         distance: distanceKm > 1 ? distanceKm.toFixed(2) + " km" : distanceM.toFixed(2) + " m",
         points: points,
         center: getCenter(game.guess, locationGeo),
@@ -134,21 +137,23 @@ export default function Game({ game, setGame, db }) {
         zoom: getZoom(game.guess.lat, game.guess.lng, locationGeo.lat, locationGeo.lng) + 1,
         final: game.currentLocation === 4 ? true : false,
       });
-      setGame({ ...game, totalScore: game.totalScore + points });
-      setGameSummary({ ...gameSummary, rounds: gameSummary.rounds.concat({ guess: game.guess, location: locationGeo }) });
+      setGame({ ...game, totalScore: game.totalScore + points }); //dodanie punktow
+      setGameSummary({ ...gameSummary, rounds: gameSummary.rounds.concat({ guess: game.guess, location: locationGeo }) }); //dodanie wyniku rundy do obiektu zawierajacego podsumowanie gry
     }
   };
   if (isLoaded && game.locations?.length > 0) {
+    //jesli dane sa zaladowane wyswietlamy gre
     if (roundSummary) {
       if (gameSummary.summaryScreen) {
+        //ekran podsumowania calej gry
         return (
           <GoogleMap mapContainerStyle={containerStyle} center={{ lat: 53.8632402, lng: 20.3740641 }} zoom={8} options={{ disableDefaultUI: true }} onUnmount={onUnmount}>
             {gameSummary.rounds.map((round, index) => {
               return (
                 <>
-                  <Marker key={index} position={round.guess} />
-                  <Marker key={index} position={round.location} />
-                  <Polyline key={index} path={[round.guess, round.location]} />
+                  <Marker key={index + "guess"} position={round.guess} icon={{ url: "/images/markerGuess.png", scaledSize: new window.google.maps.Size(50, 50) }} />
+                  <Marker key={index + "location"} position={round.location} icon={{ url: "/images/marker2.png", scaledSize: new window.google.maps.Size(50, 50) }} />
+                  <Polyline key={index + "line"} path={[round.guess, round.location]} />
                 </>
               );
             })}
@@ -163,10 +168,10 @@ export default function Game({ game, setGame, db }) {
                 className="btn"
                 style={{ padding: "1rem" }}
                 onClick={() => {
-                  setGame(null);
                   setGame({ mode: "cities" });
                   setGameSummary({ rounds: [], summaryScreen: false });
                   setRoundSummary(null);
+                  setGameReload(true);
                 }}
               >
                 Następna gra ?
@@ -175,11 +180,12 @@ export default function Game({ game, setGame, db }) {
           </GoogleMap>
         );
       } else {
+        //ekran podsumowania rundy
         return (
           <GoogleMap mapContainerStyle={containerStyle} center={roundSummary.center} zoom={roundSummary.zoom} options={{ disableDefaultUI: true }} onUnmount={onUnmount}>
             <>
-              <Marker position={roundSummary.guess} id="guessMarker" />
-              <Marker position={roundSummary.location.geo} title="Lokalizacja" id="locationMarker" />
+              <Marker position={roundSummary.guess} icon={{ url: "/images/markerGuess.png", scaledSize: new window.google.maps.Size(50, 50) }} />
+              <Marker position={roundSummary.location.geo} icon={{ url: "/images/marker2.png", scaledSize: new window.google.maps.Size(50, 50) }} />
               <Polyline path={[roundSummary.guess, roundSummary.location.geo]} options={{ strokeColor: "#17171c", strokeOpacity: "0.8", strokeWeight: "2" }} />
             </>
             <div className="game_roundSummary">
@@ -226,21 +232,23 @@ export default function Game({ game, setGame, db }) {
         content: "Wróć do pierwotnej lokalizacji",
         placement: "right",
       });
+      //ekran gry
       return (
         <GoogleMap mapContainerStyle={containerStyle} onLoad={onLoad}>
           <StreetViewPanorama
-            //   center={locations[0].geo}
             visible={true}
             options={{
-              disableDefaultUI: true,
-              panControl: true,
+              disableDefaultUI: true, //zablokowanie ustawień mapy
+              panControl: true, //pokazanie kompasu w lewym gornym rogu
               panControlOptions: {
                 position: window.google.maps.ControlPosition.TOP_LEFT,
               },
               enableCloseButton: false,
-              position: game.locations[game.currentLocation].geo,
+              showRoadLabels: false,
             }}
             onLoad={(sv) => {
+              //ustawienie streetview na obecnej lokalizacji
+              sv.setPosition(game.locations[game.currentLocation].geo);
               setStreetView(sv);
             }}
           />
@@ -269,7 +277,7 @@ export default function Game({ game, setGame, db }) {
               onLoad={onLoadGuess}
               // onUnmount={onUnmount}
             >
-              {game.guess && <Marker position={game.guess} />}
+              {game.guess && <Marker position={game.guess} icon={{ url: "/images/markerGuess.png", scaledSize: new window.google.maps.Size(50, 50) }} />}
             </GoogleMap>
             <button
               className={game.guess ? "game_guessBtn btn" : "game_guessBtn game_guessBtn_disabled btn"} //jesli nie wybrano punktu to przycisk jest nieaktywny

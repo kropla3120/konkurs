@@ -30,12 +30,13 @@
   justify-content: space-between;
   width: 25rem;
   margin: 1rem 1rem;
-  backdrop-filter: blur(8px) brightness(0.4);
+  backdrop-filter: blur(8px) brightness(0.5) contrast(1.5);
   height: calc(70%);
   z-index: 3;
   bottom: 0;
   left: 0;
   border-radius: 0.5rem;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
   box-sizing: border-box;
   padding: 1rem;
 }
@@ -69,4 +70,18 @@
 .game_controls ion-icon {
   // color: white;
   font-size: 20px;
+}
+@media (orientation: portrait) {
+  .game_guessDiv {
+    width: 92%;
+    height: 40%;
+  }
+  .game_guessDiv:hover {
+    width: 92%;
+    height: 40%;
+  }
+  .game_roundSummary {
+    width: 92%;
+    height: 60%;
+  }
 }

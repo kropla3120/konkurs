@@ -18,4 +18,30 @@
 }
 .nav_gameDiv {
   display: flex;
+  align-items: center;
+}
+.nav_gameDiv h1 {
+  font-weight: 400;
+  font-size: 30px;
+}
+.nav_gameDiv h1 b {
+  font-size: 40px;
+  font-stretch: 10%;
+  font-weight: 800;
+  letter-spacing: -2px;
+  background: linear-gradient(90deg, rgba(255, 240, 0, 1) 0%, rgba(27, 248, 79, 1) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+@media (orientation: portrait) {
+  .nav_logo img {
+    height: 5vh;
+  }
+  .nav_leaveGame {
+    width: 5rem;
+    height: 4rem;
+  }
+  .nav_gameDiv h1 {
+    // margin-bottom: 22px;
+  }
 }
