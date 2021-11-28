@@ -81,7 +81,7 @@ const LandingPage = ({ setGame }) => {
               </button>
             </figure>
           </div>
-          <div className="landing_mode">
+          {/* <div className="landing_mode">
             <figure className="landing_figure">
               <img src="/images/landing_krajobrazy.jpg" alt="mode_krajobrazy" />
               <button
@@ -93,7 +93,7 @@ const LandingPage = ({ setGame }) => {
                 <h1>Krajobrazy</h1>
               </button>
             </figure>
-          </div>
+          </div> */}
           <div className="landing_mode">
             <figure className="landing_figure">
               <img src="/images/landing_zabytki.jpg" alt="mode_zabytki" />

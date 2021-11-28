@@ -42,7 +42,7 @@ export default function Game({ game: gameStatus, setGame: setGameStatus, db }) {
       sv.setPosition(game.locations[game.currentLocation].geo);
       setStreetView(sv);
     },
-    [setGame, game]
+    [game]
   );
   const onUnmount = useCallback(
     function callback(map) {
