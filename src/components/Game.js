@@ -8,7 +8,8 @@ import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
 import "../styles/Game.scss";
 
-export default function Game({ game, setGame, db }) {
+export default function Game({ game: gameStatus, setGame: setGameStatus, db }) {
+  const [game, setGame] = useState(gameStatus);
   const [roundSummary, setRoundSummary] = useState(null);
   const [streetView, setStreetView] = useState(null);
   const [gameSummary, setGameSummary] = useState({ rounds: [], summaryScreen: false });
@@ -33,6 +34,13 @@ export default function Game({ game, setGame, db }) {
     function callback(map) {
       map.setCenter({ lat: 53.8632402, lng: 20.3740641 });
       setGame({ ...game, map: map });
+    },
+    [setGame, game]
+  );
+  const onLoadStreetView = useCallback(
+    function callback(sv) {
+      sv.setPosition(game.locations[game.currentLocation].geo);
+      setStreetView(sv);
     },
     [setGame, game]
   );
@@ -62,8 +70,9 @@ export default function Game({ game, setGame, db }) {
             randomLocations.push(locationsArr[randomLocation]);
           }
         }
-        console.log(randomLocations);
-        setGame({ ...game, totalScore: 0, locations: randomLocations, currentLocation: 0 });
+        // console.log(randomLocations);
+        setGameStatus({ ...gameStatus, totalScore: 0 });
+        setGame({ ...game, locations: randomLocations, currentLocation: 0 });
         setGameReload(false);
       });
     },
@@ -139,7 +148,7 @@ export default function Game({ game, setGame, db }) {
         zoom: getZoom(game.guess.lat, game.guess.lng, locationGeo.lat, locationGeo.lng) + 1,
         final: game.currentLocation === 4 ? true : false,
       });
-      setGame({ ...game, totalScore: game.totalScore + points }); //dodanie punktow
+      setGameStatus({ ...gameStatus, totalScore: gameStatus.totalScore + points });
       setGameSummary({ ...gameSummary, rounds: gameSummary.rounds.concat({ guess: game.guess, location: locationGeo }) }); //dodanie wyniku rundy do obiektu zawierajacego podsumowanie gry
     }
   };
@@ -163,14 +172,15 @@ export default function Game({ game, setGame, db }) {
               <div>
                 <h1 className="game_roundSummary_points">
                   Gratulacje!
-                  <br /> Zdobyłeś <b>{game.totalScore}</b> punktów!
+                  <br /> Zdobyłeś <b>{gameStatus.totalScore}</b> punktów!
                 </h1>
               </div>
               <button
                 className="btn"
                 style={{ padding: "1rem" }}
                 onClick={() => {
-                  setGame({ mode: "cities" });
+                  setGameStatus({ ...gameStatus, totalScore: 0 });
+                  setGame({ mode: game.mode });
                   setGameSummary({ rounds: [], summaryScreen: false });
                   setRoundSummary(null);
                   setGameReload(true);
@@ -247,12 +257,9 @@ export default function Game({ game, setGame, db }) {
               },
               enableCloseButton: false,
               showRoadLabels: false,
+              position: game.locations[game.currentLocation].geo,
             }}
-            onLoad={(sv) => {
-              //ustawienie streetview na obecnej lokalizacji
-              sv.setPosition(game.locations[game.currentLocation].geo);
-              setStreetView(sv);
-            }}
+            onLoad={onLoadStreetView}
           />
           <div className="game_controls">
             <button
