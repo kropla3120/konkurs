@@ -1,6 +1,6 @@
 # WMGuessr - gra zainspirowana popularnym GeoGuessr'em.
 
-Gracz po wejściu do gry dostaje widok StreetView 5 losowych lokalizacji znajdujących się w Warmi i Mazurach o tematyce wybranego trybu gry. Celem gracza jest odgadnięcie po samym Streetview w jakiej lokalizacji się znajduje, im bliżej trafi tym większa ilość punktów. Maksimum punktów za każdą lokalizację to 1000, za całą rozgrywkę 5000.
+Gracz po wejściu do gry dostaje widok StreetView, pięciu losowych lokalizacji znajdujących się w Warmi i Mazurach o tematyce wybranego trybu gry. Celem gracza jest odgadnięcie po samym Streetview w jakiej lokalizacji się znajduje, im bliżej trafi tym większa ilość punktów. Maksimum punktów za każdą lokalizację to 1000, za całą rozgrywkę 5000.
 
 Gra jest zahostowana pod adresem
 
