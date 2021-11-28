@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { collection, getDocs } from "firebase/firestore/lite";
 import { GoogleMap, useJsApiLoader, StreetViewPanorama, Marker, Polyline } from "@react-google-maps/api";
+import markerLocation from "../images/markerLocation.png";
+import markerGuess from "../images/markerGuess.png";
 import tippy from "tippy.js";
 
 import "tippy.js/dist/tippy.css";
@@ -151,8 +153,8 @@ export default function Game({ game, setGame, db }) {
             {gameSummary.rounds.map((round, index) => {
               return (
                 <>
-                  <Marker key={index + "guess"} position={round.guess} icon={{ url: "/images/markerGuess.png", scaledSize: new window.google.maps.Size(50, 50) }} />
-                  <Marker key={index + "location"} position={round.location} icon={{ url: "/images/marker2.png", scaledSize: new window.google.maps.Size(50, 50) }} />
+                  <Marker key={index + "guess"} position={round.guess} icon={{ url: markerGuess, scaledSize: new window.google.maps.Size(50, 50) }} />
+                  <Marker key={index + "location"} position={round.location} icon={{ url: markerLocation, scaledSize: new window.google.maps.Size(50, 50) }} />
                   <Polyline key={index + "line"} path={[round.guess, round.location]} />
                 </>
               );
@@ -184,8 +186,8 @@ export default function Game({ game, setGame, db }) {
         return (
           <GoogleMap mapContainerStyle={containerStyle} center={roundSummary.center} zoom={roundSummary.zoom} options={{ disableDefaultUI: true }} onUnmount={onUnmount}>
             <>
-              <Marker position={roundSummary.guess} icon={{ url: "/images/markerGuess.png", scaledSize: new window.google.maps.Size(50, 50) }} />
-              <Marker position={roundSummary.location.geo} icon={{ url: "/images/marker2.png", scaledSize: new window.google.maps.Size(50, 50) }} />
+              <Marker position={roundSummary.guess} icon={{ url: markerGuess, scaledSize: new window.google.maps.Size(50, 50) }} />
+              <Marker position={roundSummary.location.geo} icon={{ url: markerLocation, scaledSize: new window.google.maps.Size(50, 50) }} />
               <Polyline path={[roundSummary.guess, roundSummary.location.geo]} options={{ strokeColor: "#17171c", strokeOpacity: "0.8", strokeWeight: "2" }} />
             </>
             <div className="game_roundSummary">
@@ -277,7 +279,7 @@ export default function Game({ game, setGame, db }) {
               onLoad={onLoadGuess}
               // onUnmount={onUnmount}
             >
-              {game.guess && <Marker position={game.guess} icon={{ url: "/images/markerGuess.png", scaledSize: new window.google.maps.Size(50, 50) }} />}
+              {game.guess && <Marker position={game.guess} icon={{ url: markerGuess, scaledSize: new window.google.maps.Size(50, 50) }} />}
             </GoogleMap>
             <button
               className={game.guess ? "game_guessBtn btn" : "game_guessBtn game_guessBtn_disabled btn"} //jesli nie wybrano punktu to przycisk jest nieaktywny
