@@ -25,7 +25,6 @@ const db = getFirestore(app);
 const auth = getAuth();
 
 function App() {
-  console.log("chuj")
   const [game, setGame] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
